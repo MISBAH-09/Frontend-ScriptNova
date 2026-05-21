@@ -1,0 +1,970 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BlogForge CMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c28;
+    --border: #2a2a3d;
+    --accent: #e8c547;
+    --accent2: #c47fff;
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+    --danger: #ff5c5c;
+    --success: #4ade80;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 240px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+  }
+
+  .logo {
+    padding: 28px 24px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-mark {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--accent);
+  }
+
+  .logo-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .nav {
+    padding: 16px 12px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(232,197,71,0.12); color: var(--accent); }
+  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+
+  .nav-section {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 12px 12px 4px;
+    opacity: 0.6;
+  }
+
+  .stats-bar {
+    padding: 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .stat-val {
+    font-family: 'DM Mono', monospace;
+    color: var(--text);
+  }
+
+  .server-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+  .status-dot.online { background: var(--success); animation: pulse 2s infinite; }
+  .status-dot.offline { background: var(--danger); }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+  /* MAIN */
+  .main {
+    margin-left: 240px;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  .topbar {
+    padding: 20px 36px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(10,10,15,0.8);
+    backdrop-filter: blur(8px);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .topbar-actions { display: flex; gap: 10px; }
+
+  .btn {
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .btn-primary { background: var(--accent); color: #0a0a0f; }
+  .btn-primary:hover { background: #f0d05a; transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--muted); color: var(--text); }
+  .btn-danger { background: transparent; color: var(--danger); border: 1px solid rgba(255,92,92,0.3); }
+  .btn-danger:hover { background: rgba(255,92,92,0.1); }
+
+  /* PAGES */
+  .page { display: none; padding: 36px; animation: fadeIn 0.2s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  /* GENERATE */
+  .generate-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 1200px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+  }
+
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    background: rgba(232,197,71,0.15);
+    color: var(--accent);
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .form-group { margin-bottom: 18px; }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+  }
+
+  input[type="text"], input[type="password"], textarea, select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    transition: border-color 0.15s;
+    outline: none;
+    resize: vertical;
+  }
+
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+  select option { background: var(--surface); }
+
+  .output-area {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    min-height: 300px;
+    font-size: 14px;
+    line-height: 1.8;
+  }
+
+  .output-placeholder {
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 280px;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .output-placeholder .icon-big { font-size: 40px; opacity: 0.3; }
+
+  .generating { display: none; align-items: center; gap: 10px; color: var(--accent); font-family: 'DM Mono', monospace; font-size: 13px; margin-bottom: 16px; }
+  .generating.show { display: flex; }
+
+  .dot-anim span { animation: blink 1.2s infinite; opacity: 0; }
+  .dot-anim span:nth-child(2) { animation-delay: 0.3s; }
+  .dot-anim span:nth-child(3) { animation-delay: 0.6s; }
+  @keyframes blink { 0%,100%{opacity:0;} 50%{opacity:1;} }
+
+  .blog-preview { display: none; }
+  .blog-preview.show { display: block; }
+  .blog-preview h1 { font-family: 'Playfair Display', serif; font-size: 26px; margin-bottom: 16px; line-height: 1.3; }
+  .blog-preview h2 { font-family: 'Playfair Display', serif; font-size: 18px; margin: 20px 0 10px; color: var(--accent); }
+  .blog-preview p { margin-bottom: 12px; color: #c8c8e0; line-height: 1.8; }
+  .blog-preview ul, .blog-preview ol { padding-left: 20px; margin-bottom: 12px; color: #c8c8e0; }
+  .blog-preview li { margin-bottom: 6px; line-height: 1.7; }
+  .blog-preview strong { color: var(--text); }
+  .blog-preview .meta-box { background: rgba(232,197,71,0.08); border: 1px solid rgba(232,197,71,0.2); border-radius: 8px; padding: 14px; margin-bottom: 20px; font-family: 'DM Mono', monospace; font-size: 12px; }
+  .blog-preview .meta-label { color: var(--accent); font-weight: 500; }
+  .blog-preview .meta-val { color: var(--muted); margin-top: 4px; line-height: 1.5; }
+
+  .action-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  .word-count { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); text-align: right; margin-top: 6px; }
+
+  .seo-score { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .seo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+  .seo-dot.warn { background: var(--accent); }
+  .seo-dot.bad { background: var(--danger); }
+
+  /* MANAGE */
+  .blogs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; max-width: 1200px; }
+
+  .blog-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .blog-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg, var(--accent), var(--accent2)); opacity:0; transition:opacity 0.2s; }
+  .blog-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .blog-card:hover::before { opacity: 1; }
+
+  .blog-card-title { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; margin-bottom: 8px; line-height: 1.4; }
+  .blog-card-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 12px; display: flex; gap: 12px; }
+  .blog-card-excerpt { font-size: 13px; color: var(--muted); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .blog-card-actions { display: flex; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+
+  .empty-state { text-align: center; padding: 80px 20px; color: var(--muted); grid-column: 1/-1; }
+  .empty-state .big-icon { font-size: 52px; opacity: 0.2; margin-bottom: 16px; }
+
+  /* EDITOR */
+  .editor-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 1400px; height: calc(100vh - 180px); }
+  .editor-pane { display: flex; flex-direction: column; gap: 12px; }
+  #editor-title { font-family: 'Playfair Display', serif; font-size: 18px; }
+  #editor-content { flex: 1; min-height: 400px; font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.8; }
+
+  .preview-pane { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; overflow-y: auto; }
+  .preview-pane h1 { font-family: 'Playfair Display', serif; font-size: 24px; margin-bottom: 16px; line-height: 1.3; }
+  .preview-pane h2 { font-family: 'Playfair Display', serif; font-size: 18px; margin: 20px 0 10px; color: var(--accent); }
+  .preview-pane p { margin-bottom: 12px; color: #c8c8e0; line-height: 1.8; font-size: 14px; }
+  .preview-pane ul, .preview-pane ol { padding-left: 20px; margin-bottom: 12px; color: #c8c8e0; }
+  .preview-pane li { margin-bottom: 6px; line-height: 1.7; font-size: 14px; }
+  .preview-pane strong { color: var(--text); }
+
+  /* SETTINGS */
+  .settings-layout { max-width: 600px; display: flex; flex-direction: column; gap: 20px; }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 20px; font-size: 14px; z-index: 9999; display: flex; align-items: center; gap: 10px; transform: translateY(100px); opacity: 0; transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); max-width: 320px; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-color: rgba(74,222,128,0.3); }
+  .toast.error { border-color: rgba(255,92,92,0.3); }
+
+  /* MODAL */
+  .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+  .modal-backdrop.show { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 32px; max-width: 480px; width: 90%; animation: fadeIn 0.2s ease; }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 16px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 900px) {
+    .sidebar { width: 60px; }
+    .sidebar .logo-mark, .sidebar .logo-sub, .sidebar .nav-item span:not(.icon), .nav-section, .stats-bar { display: none; }
+    .main { margin-left: 60px; }
+    .generate-layout, .editor-layout { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">BlogForge</div>
+    <div class="logo-sub">CMS v2.0</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">Main</div>
+    <button class="nav-item active" onclick="showPage('generate')">
+      <span class="icon">✦</span><span>Generate</span>
+    </button>
+    <button class="nav-item" onclick="showPage('manage')">
+      <span class="icon">◈</span><span>My Blogs</span>
+    </button>
+    <button class="nav-item" onclick="showPage('editor')">
+      <span class="icon">◎</span><span>Editor</span>
+    </button>
+    <div class="nav-section">Config</div>
+    <button class="nav-item" onclick="showPage('settings')">
+      <span class="icon">⊙</span><span>Settings</span>
+    </button>
+  </nav>
+  <div class="stats-bar">
+    <div class="stat-row"><span>Total Blogs</span><span class="stat-val" id="total-count">0</span></div>
+    <div class="stat-row"><span>Session</span><span class="stat-val" id="session-count">0</span></div>
+    <div class="server-status">
+      <span class="status-dot" id="status-dot"></span>
+      <span id="status-text">Connecting...</span>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="page-title" id="page-title">Generate Blog</div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost" onclick="showPage('manage')">◈ My Blogs</button>
+      <button class="btn btn-primary" onclick="showPage('generate')">✦ New Blog</button>
+    </div>
+  </div>
+
+  <!-- GENERATE PAGE -->
+  <div class="page active" id="page-generate">
+    <div class="generate-layout">
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <div class="card">
+          <div class="card-title">Blog Generator <span class="badge">AI Powered</span></div>
+          <div class="form-group">
+            <label>Topic / Prompt</label>
+            <textarea id="topic-input" rows="3" placeholder="e.g. Write a blog about AI in healthcare"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Tone</label>
+            <select id="tone-select">
+              <option value="informative and friendly">Informative & Friendly</option>
+              <option value="professional and authoritative">Professional & Authoritative</option>
+              <option value="casual and conversational">Casual & Conversational</option>
+              <option value="persuasive and engaging">Persuasive & Engaging</option>
+              <option value="educational and detailed">Educational & Detailed</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Target Length</label>
+            <select id="length-select">
+              <option value="800-1000">Short (800-1000 words)</option>
+              <option value="1000-1500" selected>Medium (1000-1500 words)</option>
+              <option value="1500-2500">Long (1500-2500 words)</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" style="width:100%;padding:14px;" onclick="generateBlog()">
+            ✦ Generate SEO Blog
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">SEO Checklist</div>
+          <div style="display:flex;flex-direction:column;gap:8px;" id="seo-checklist">
+            <div class="seo-score"><span class="seo-dot warn"></span>Generate a blog to see SEO analysis</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="output-area" id="output-area">
+          <div class="generating" id="generating-indicator">
+            <span>⟳</span>Writing your blog<span class="dot-anim"><span>.</span><span>.</span><span>.</span></span>
+          </div>
+          <div class="output-placeholder" id="output-placeholder">
+            <div class="icon-big">✦</div>
+            <div>
+              <div style="font-size:15px;color:var(--text);margin-bottom:6px;">Your blog will appear here</div>
+              <div style="font-size:13px;">Enter a topic and click Generate</div>
+            </div>
+          </div>
+          <div class="blog-preview" id="blog-preview"></div>
+        </div>
+        <div class="word-count" id="word-count"></div>
+        <div class="action-row" id="action-row" style="display:none;">
+          <button class="btn btn-primary" onclick="saveBlog()">◈ Save to Library</button>
+          <button class="btn btn-ghost" onclick="openInEditor()">◎ Open in Editor</button>
+          <button class="btn btn-ghost" onclick="downloadBlog('md')">↓ Download .md</button>
+          <button class="btn btn-ghost" onclick="downloadBlog('txt')">↓ Download .txt</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANAGE PAGE -->
+  <div class="page" id="page-manage">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;max-width:1200px;">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:4px;letter-spacing:1px;">LIBRARY</div>
+        <div style="font-size:16px;color:var(--muted);">All your saved blogs in one place</div>
+      </div>
+      <button class="btn btn-primary" onclick="showPage('generate')">✦ New Blog</button>
+    </div>
+    <div class="blogs-grid" id="blogs-grid"></div>
+  </div>
+
+  <!-- EDITOR PAGE -->
+  <div class="page" id="page-editor">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;max-width:1400px;">
+      <div style="font-size:14px;color:var(--muted);">Live markdown preview on the right</div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-ghost" onclick="downloadEditorBlog('md')">↓ .md</button>
+        <button class="btn btn-ghost" onclick="downloadEditorBlog('txt')">↓ .txt</button>
+        <button class="btn btn-primary" onclick="saveEditorBlog()">◈ Save</button>
+      </div>
+    </div>
+    <div class="editor-layout">
+      <div class="editor-pane">
+        <div class="form-group" style="margin:0;"><label>Title</label><input type="text" id="editor-title" placeholder="Blog title..."/></div>
+        <div class="form-group" style="margin:0;flex:1;display:flex;flex-direction:column;"><label>Content (Markdown)</label><textarea id="editor-content" placeholder="Start writing..."></textarea></div>
+        <div class="word-count" id="editor-word-count">0 words</div>
+      </div>
+      <div class="preview-pane" id="editor-preview">
+        <div style="color:var(--muted);text-align:center;padding:40px;font-size:14px;">Start typing to see preview...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS PAGE -->
+  <div class="page" id="page-settings">
+    <div class="settings-layout">
+      <div class="card">
+        <div class="card-title">Backend Configuration</div>
+        <div class="form-group">
+          <label>Backend API URL</label>
+          <input type="text" id="backend-url-input" placeholder="https://your-app.vercel.app"/>
+          <div style="font-size:12px;color:var(--muted);margin-top:8px;">
+            Paste your Vercel backend URL here after deploying the backend
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="saveBackendUrl()">Save & Test Connection</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Data Management</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">All blogs are stored in your browser locally.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-ghost" onclick="exportAll()">↓ Export All Blogs</button>
+          <button class="btn btn-danger" onclick="confirmClearAll()">⊗ Clear All Data</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">About</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.8;">
+          BlogForge CMS v2.0<br>
+          Backend: FastAPI on Vercel<br>
+          AI: Groq + Llama 3.3 70B<br>
+          <span style="color:var(--accent);font-family:'DM Mono',monospace;font-size:11px;">100% Free — Built with ♥</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL -->
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal">
+    <div class="modal-title" id="modal-title"></div>
+    <div id="modal-body"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="toast-icon">✓</span>
+  <span id="toast-msg"></span>
+</div>
+
+<script>
+// ==============================
+// ⚠️ IMPORTANT: After deploying backend to Vercel,
+// replace the URL below with your actual backend URL
+// Example: "https://blogforge-backend.vercel.app"
+// ==============================
+const DEFAULT_BACKEND_URL = "https://blogforge-ashy.vercel.app/";
+
+let BACKEND_URL = localStorage.getItem('blogforge_backend_url') || DEFAULT_BACKEND_URL;
+let blogs = JSON.parse(localStorage.getItem('blogforge_blogs') || '[]');
+let currentBlog = null;
+let sessionCount = 0;
+let editingIndex = -1;
+
+const PAGES = {
+  generate: 'Generate Blog',
+  manage: 'My Blogs',
+  editor: 'Blog Editor',
+  settings: 'Settings'
+};
+
+// ==============================
+// INIT
+// ==============================
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('editor-content').addEventListener('input', updateEditorPreview);
+  document.getElementById('editor-title').addEventListener('input', updateEditorPreview);
+  document.getElementById('backend-url-input').value = BACKEND_URL;
+  updateStats();
+  checkServerStatus();
+});
+
+// ==============================
+// SERVER STATUS CHECK
+// ==============================
+async function checkServerStatus() {
+  const dot = document.getElementById('status-dot');
+  const text = document.getElementById('status-text');
+  try {
+    const res = await fetch(`${BACKEND_URL}/health`, { signal: AbortSignal.timeout(6000) });
+    if (res.ok) {
+      dot.className = 'status-dot online';
+      text.textContent = 'Server online';
+    } else throw new Error();
+  } catch {
+    dot.className = 'status-dot offline';
+    text.textContent = 'Server offline';
+  }
+}
+
+// ==============================
+// NAVIGATION
+// ==============================
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('page-title').textContent = PAGES[name];
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick')?.includes(name)) n.classList.add('active');
+  });
+  if (name === 'manage') renderBlogs();
+  updateStats();
+}
+
+// ==============================
+// GENERATE
+// ==============================
+async function generateBlog() {
+  const topicRaw = document.getElementById('topic-input').value.trim();
+  if (!topicRaw) { showToast('Please enter a topic!', 'error'); return; }
+
+  if (!BACKEND_URL || BACKEND_URL.includes('YOUR-BACKEND-URL')) {
+    showToast('Please set your backend URL in Settings first!', 'error');
+    showPage('settings');
+    return;
+  }
+
+  const tone = document.getElementById('tone-select').value;
+  const length = document.getElementById('length-select').value;
+
+  document.getElementById('output-placeholder').style.display = 'none';
+  document.getElementById('blog-preview').classList.remove('show');
+  document.getElementById('generating-indicator').classList.add('show');
+  document.getElementById('action-row').style.display = 'none';
+  document.getElementById('word-count').textContent = '';
+  document.getElementById('seo-checklist').innerHTML = '<div class="seo-score"><span class="seo-dot warn"></span>Generating...</div>';
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ topic: topicRaw, tone, length })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Server error');
+
+    const content = data.content;
+    currentBlog = {
+      title: extractTitle(content) || topicRaw,
+      content,
+      topic: data.topic,
+      date: new Date().toISOString()
+    };
+
+    document.getElementById('generating-indicator').classList.remove('show');
+    const preview = document.getElementById('blog-preview');
+    preview.innerHTML = renderMarkdown(content);
+    preview.classList.add('show');
+    document.getElementById('action-row').style.display = 'flex';
+
+    const words = content.split(/\s+/).length;
+    document.getElementById('word-count').textContent = `~${words} words`;
+
+    sessionCount++;
+    updateStats();
+    updateSEOChecklist(content);
+    showToast('Blog generated!', 'success');
+
+  } catch (err) {
+    document.getElementById('generating-indicator').classList.remove('show');
+    document.getElementById('output-placeholder').style.display = 'flex';
+    showToast('Error: ' + err.message, 'error');
+    document.getElementById('seo-checklist').innerHTML = '<div class="seo-score"><span class="seo-dot bad"></span>Generation failed</div>';
+    checkServerStatus();
+  }
+}
+
+function extractTitle(content) {
+  for (const line of content.split('\n')) {
+    if (line.startsWith('# ')) return line.slice(2).trim();
+  }
+  return null;
+}
+
+function updateSEOChecklist(content) {
+  const wordCount = content.split(/\s+/).length;
+  const checks = [
+    { label: 'Meta Title present', pass: content.includes('META TITLE:') },
+    { label: 'Meta Description present', pass: content.includes('META DESCRIPTION:') },
+    { label: '3+ H2 headings', pass: (content.match(/^## /gm) || []).length >= 3 },
+    { label: 'FAQ section included', pass: content.toLowerCase().includes('frequently asked') },
+    { label: 'Conclusion section', pass: content.toLowerCase().includes('conclusion') },
+    { label: `Word count (~${wordCount})`, pass: wordCount >= 800 },
+  ];
+  document.getElementById('seo-checklist').innerHTML = checks.map(c =>
+    `<div class="seo-score">
+      <span class="seo-dot${c.pass ? '' : ' bad'}"></span>
+      <span style="color:${c.pass ? 'var(--success)' : 'var(--danger)'}">${c.pass ? '✓' : '✗'}</span>
+      ${c.label}
+    </div>`
+  ).join('');
+}
+
+// ==============================
+// MARKDOWN RENDERER
+// ==============================
+function renderMarkdown(md) {
+  let html = '';
+  const metaMatch = md.match(/---\n([\s\S]*?)\n---/);
+  if (metaMatch) {
+    const lines = metaMatch[1].split('\n').filter(l => l.trim());
+    html += `<div class="meta-box">`;
+    for (const line of lines) {
+      const [key, ...val] = line.split(':');
+      html += `<div class="meta-label">${key.trim()}</div><div class="meta-val">${val.join(':').trim()}</div>`;
+    }
+    html += `</div>`;
+    md = md.replace(/---\n[\s\S]*?\n---/, '');
+  }
+  const lines = md.split('\n');
+  let inList = false;
+  for (const line of lines) {
+    const t = line.trim();
+    if (!t) { if (inList) { html += '</ul>'; inList = false; } continue; }
+    if (t.startsWith('# ')) html += `<h1>${t.slice(2)}</h1>`;
+    else if (t.startsWith('## ')) html += `<h2>${t.slice(3)}</h2>`;
+    else if (t.startsWith('### ')) html += `<h3 style="font-size:15px;margin:12px 0 6px;">${t.slice(4)}</h3>`;
+    else if (t.startsWith('- ') || t.startsWith('* ')) {
+      if (!inList) { html += '<ul>'; inList = true; }
+      html += `<li>${fmt(t.slice(2))}</li>`;
+    } else if (/^\d+\. /.test(t)) {
+      if (!inList) { html += '<ol>'; inList = true; }
+      html += `<li>${fmt(t.replace(/^\d+\. /, ''))}</li>`;
+    } else {
+      if (inList) { html += '</ul>'; inList = false; }
+      html += `<p>${fmt(t)}</p>`;
+    }
+  }
+  return html;
+}
+
+function fmt(t) {
+  return t
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>');
+}
+
+// ==============================
+// SAVE & DOWNLOAD
+// ==============================
+function saveBlog() {
+  if (!currentBlog) return;
+  blogs.unshift(currentBlog);
+  localStorage.setItem('blogforge_blogs', JSON.stringify(blogs));
+  updateStats();
+  showToast('Saved to library!', 'success');
+}
+
+function downloadBlog(format) {
+  if (!currentBlog) return;
+  const name = (currentBlog.title || 'blog').replace(/[^a-z0-9]/gi, '-').toLowerCase();
+  const content = format === 'txt' ? currentBlog.content.replace(/[#*`_]/g, '') : currentBlog.content;
+  dlFile(name + '.' + format, content);
+}
+
+function dlFile(name, content) {
+  const a = document.createElement('a');
+  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(content);
+  a.download = name;
+  a.click();
+}
+
+function openInEditor() {
+  if (!currentBlog) return;
+  document.getElementById('editor-title').value = currentBlog.title || '';
+  document.getElementById('editor-content').value = currentBlog.content || '';
+  editingIndex = -1;
+  updateEditorPreview();
+  showPage('editor');
+}
+
+// ==============================
+// MANAGE / LIBRARY
+// ==============================
+function renderBlogs() {
+  const grid = document.getElementById('blogs-grid');
+  if (!blogs.length) {
+    grid.innerHTML = `<div class="empty-state"><div class="big-icon">◈</div><p>No blogs yet.<br>Generate your first!</p></div>`;
+    return;
+  }
+  grid.innerHTML = blogs.map((b, i) => {
+    const date = new Date(b.date).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    const words = (b.content || '').split(/\s+/).length;
+    const excerpt = (b.content || '').replace(/[#*`_\-]/g, '').slice(0, 160);
+    return `<div class="blog-card">
+      <div class="blog-card-title">${b.title || 'Untitled'}</div>
+      <div class="blog-card-meta"><span>📅 ${date}</span><span>~${words} words</span></div>
+      <div class="blog-card-excerpt">${excerpt}...</div>
+      <div class="blog-card-actions">
+        <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px;" onclick="editBlog(${i})">◎ Edit</button>
+        <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px;" onclick="dlSaved(${i},'md')">↓ .md</button>
+        <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px;" onclick="dlSaved(${i},'txt')">↓ .txt</button>
+        <button class="btn btn-danger" style="font-size:12px;padding:6px 12px;margin-left:auto;" onclick="deleteBlog(${i})">⊗</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function editBlog(i) {
+  editingIndex = i;
+  document.getElementById('editor-title').value = blogs[i].title || '';
+  document.getElementById('editor-content').value = blogs[i].content || '';
+  updateEditorPreview();
+  showPage('editor');
+}
+
+function deleteBlog(i) {
+  showModal('Delete Blog', 'Are you sure? This cannot be undone.', [
+    { label: 'Cancel', cls: 'btn-ghost', action: closeModal },
+    { label: '⊗ Delete', cls: 'btn-danger', action: () => {
+      blogs.splice(i, 1);
+      localStorage.setItem('blogforge_blogs', JSON.stringify(blogs));
+      closeModal(); renderBlogs(); updateStats();
+      showToast('Blog deleted');
+    }}
+  ]);
+}
+
+function dlSaved(i, format) {
+  const b = blogs[i];
+  const name = (b.title || 'blog').replace(/[^a-z0-9]/gi, '-').toLowerCase();
+  dlFile(name + '.' + format, format === 'txt' ? b.content.replace(/[#*`_]/g, '') : b.content);
+}
+
+// ==============================
+// EDITOR
+// ==============================
+function updateEditorPreview() {
+  const content = document.getElementById('editor-content').value;
+  const title = document.getElementById('editor-title').value;
+  const words = content.split(/\s+/).filter(w => w).length;
+  document.getElementById('editor-word-count').textContent = `${words} words`;
+  const preview = document.getElementById('editor-preview');
+  if (!content && !title) {
+    preview.innerHTML = '<div style="color:var(--muted);text-align:center;padding:40px;font-size:14px;">Start typing to see preview...</div>';
+    return;
+  }
+  preview.innerHTML = renderMarkdown(title ? `# ${title}\n\n${content}` : content);
+}
+
+function saveEditorBlog() {
+  const title = document.getElementById('editor-title').value.trim() || 'Untitled';
+  const content = document.getElementById('editor-content').value.trim();
+  if (!content) { showToast('Nothing to save!', 'error'); return; }
+  const blog = { title, content, topic: title, date: new Date().toISOString() };
+  if (editingIndex >= 0) { blogs[editingIndex] = blog; showToast('Updated!', 'success'); }
+  else { blogs.unshift(blog); showToast('Saved!', 'success'); }
+  localStorage.setItem('blogforge_blogs', JSON.stringify(blogs));
+  updateStats();
+}
+
+function downloadEditorBlog(format) {
+  const title = document.getElementById('editor-title').value || 'blog';
+  const content = document.getElementById('editor-content').value;
+  const name = title.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+  dlFile(name + '.' + format, format === 'txt' ? content.replace(/[#*`_]/g, '') : content);
+}
+
+// ==============================
+// SETTINGS
+// ==============================
+function saveBackendUrl() {
+  const url = document.getElementById('backend-url-input').value.trim().replace(/\/$/, '');
+  if (!url) { showToast('Please enter a URL', 'error'); return; }
+  BACKEND_URL = url;
+  localStorage.setItem('blogforge_backend_url', url);
+  showToast('Saved! Testing connection...', 'success');
+  checkServerStatus();
+}
+
+function exportAll() {
+  dlFile('blogforge-export.json', JSON.stringify(blogs, null, 2));
+  showToast('Exported ' + blogs.length + ' blogs!', 'success');
+}
+
+function confirmClearAll() {
+  showModal('Clear All Data', 'This deletes ALL saved blogs. Cannot be undone.', [
+    { label: 'Cancel', cls: 'btn-ghost', action: closeModal },
+    { label: '⊗ Clear', cls: 'btn-danger', action: () => {
+      localStorage.clear();
+      blogs = [];
+      BACKEND_URL = DEFAULT_BACKEND_URL;
+      closeModal(); updateStats();
+      showToast('All data cleared');
+    }}
+  ]);
+}
+
+// ==============================
+// STATS
+// ==============================
+function updateStats() {
+  document.getElementById('total-count').textContent = blogs.length;
+  document.getElementById('session-count').textContent = sessionCount;
+}
+
+// ==============================
+// MODAL
+// ==============================
+function showModal(title, body, actions) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = `<p style="font-size:14px;color:var(--muted);line-height:1.7;">${body}</p>`;
+  document.getElementById('modal-actions').innerHTML = actions.map((a, i) =>
+    `<button class="btn ${a.cls}" id="mb${i}">${a.label}</button>`
+  ).join('');
+  actions.forEach((a, i) => document.getElementById('mb' + i).addEventListener('click', a.action));
+  document.getElementById('modal-backdrop').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modal-backdrop').classList.remove('show');
+}
+
+document.getElementById('modal-backdrop').addEventListener('click', e => {
+  if (e.target.id === 'modal-backdrop') closeModal();
+});
+
+// ==============================
+// TOAST
+// ==============================
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  document.getElementById('toast-icon').textContent = type === 'success' ? '✓' : '✗';
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>

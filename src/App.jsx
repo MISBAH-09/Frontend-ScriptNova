@@ -1,9 +1,5 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-<<<<<<< Updated upstream
-import Navbar from './components/NavBar.jsx';
-=======
 import Navbar from './components/Navbar.jsx';
->>>>>>> Stashed changes
 import Auth from './pages/Auth';
 import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';

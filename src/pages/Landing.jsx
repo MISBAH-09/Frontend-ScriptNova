@@ -1,10 +1,10 @@
 // import Navbar from '../components/Navbar';
-import HeroSection from '../components/HeroSection';
-import Navbar from '../components/NavBar';
+import HeroSection from '../components/HeroSection.jsx';
+import Navbar from '../components/Navbar.jsx';
 import FeaturesSection from '../components/FeaturesSection';
-import PricingSection from '../components/PricingSection';
-import About from '../components/About';
-import Footer from '../components/Footer';
+import PricingSection from '../components/PricingSection.jsx';
+import About from '../components/About.jsx';
+import Footer from '../components/Footer.jsx';
 
 
 export default function Landing() {

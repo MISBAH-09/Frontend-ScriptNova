@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 // import Sidebar from "../components/dashboard/Sidebar"
-import Sidebar from "../components/dashboard/sidebar"
+import Sidebar from "../components/dashboard/Sidebar"
 import Header from "../components/dashboard/Header"
 
 import BlogGenerator from "../components/dashboard/BlogGenerator"

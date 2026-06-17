@@ -1,5 +1,5 @@
 import NavButton from "./NavButton";
-import { Zap, BookOpen, PenSquare, Settings, Sparkles, CreditCard, Newspaper } from "lucide-react";
+import { Wand2, Zap, BookOpen, PenSquare, Settings, Sparkles, CreditCard, Newspaper } from "lucide-react";
 
 export default function Sidebar({ page, setPage, navigate, mobileMenu, setMobileMenu }) {
 

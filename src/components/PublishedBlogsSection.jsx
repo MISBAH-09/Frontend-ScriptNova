@@ -46,20 +46,20 @@ function PublishedBlogsSection() {
   if (!loading && blogs.length === 0) return null;
 
   return (
-    <section id="published-blogs" className="bg-white py-20 text-gray-950">
+    <section id="published-blogs" className="bg-slate-200 py-20 text-gray-950">
       <div className="mx-auto max-w-6xl px-6">
-        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-pink-500">From the blog</p>
-            <h3 className="text-3xl font-bold md:text-4xl">Latest published insights</h3>
-          </div>
-          <div className="max-w-xl">
+        <div className="max-w-xl">
             <p className="text-sm leading-6 text-gray-600">
               Read the newest articles published by ScriptNova creators, from practical guides to trend-focused analysis.
             </p>
             <Link to="/blogs" className="mt-3 inline-flex text-sm font-semibold text-pink-600 hover:text-pink-700">
               View all blogs
             </Link>
+        </div>
+        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-pink-500">From the blog</p>
+            <h3 className="text-3xl font-bold md:text-4xl">Latest published insights</h3>
           </div>
         </div>
 

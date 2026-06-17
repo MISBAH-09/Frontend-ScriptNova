@@ -79,12 +79,12 @@ function PricingSection() {
           </p>
         )}
         {message && (
-          <p className="mb-6 rounded-xl border border-blue-500/40 bg-blue-500/10 px-4 py-3 text-sm text-blue-700">
+          <p className="mb-6 rounded-xl border border-blue-500/40 bg-blue-500/10 px-4 py-3 text-sm text-black">
             {message}
           </p>
         )}
         {error && (
-          <p className="mb-6 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+          <p className="mb-6 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-black">
             {error}
           </p>
         )}
@@ -105,7 +105,7 @@ function PricingSection() {
             </button>
           </div>
 
-          <div className="bg-indigo-600 p-10 rounded-3xl">
+          <div className="bg-indigo-400 p-10 rounded-3xl">
             <h4 className="text-2xl font-semibold">Pro</h4>
             <p className="text-4xl font-bold mt-4">$19/mo</p>
             <ul className="mt-6 space-y-3">

@@ -1,22 +1,43 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { createCheckoutSession, getPaymentStatus } from "../services/payment";
 
 function PricingSection() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [plan, setPlan] = useState("free");
+  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
     const token = localStorage.getItem("userToken");
     if (!token) return;
 
-    getPaymentStatus()
-      .then((status) => setPlan(status?.plan || "free"))
-      .catch(() => setPlan("free"));
-  }, []);
+    const refreshStatus = async () => {
+      try {
+        const status = await getPaymentStatus();
+        setPlan(status?.plan || "free");
+
+        if (searchParams.get("checkout") === "success") {
+          if (status?.plan === "pro") {
+            setMessage(
+              `Subscription enabled until ${new Date(
+                status.current_period_end
+              ).toLocaleDateString()}`
+            );
+          } else {
+            setError("Redirected after checkout, but subscription is not active yet.");
+          }
+        }
+      } catch {
+        setPlan("free");
+      }
+    };
+
+    refreshStatus();
+  }, [searchParams]);
 
   const handleFreePlan = () => {
     const token = localStorage.getItem("userToken");
@@ -32,6 +53,7 @@ function PricingSection() {
 
     setIsLoading(true);
     setError("");
+    setMessage("");
 
     try {
       const status = await getPaymentStatus();
@@ -56,6 +78,11 @@ function PricingSection() {
         {plan === "pro" && (
           <p className="mb-6 rounded-xl border border-green-500/40 bg-green-500/10 px-4 py-3 text-sm text-green-700">
             You are currently on the Pro plan.
+          </p>
+        )}
+        {message && (
+          <p className="mb-6 rounded-xl border border-blue-500/40 bg-blue-500/10 px-4 py-3 text-sm text-blue-700">
+            {message}
           </p>
         )}
         {error && (

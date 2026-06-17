@@ -1,12 +1,22 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createCheckoutSession } from "../services/payment";
+import { createCheckoutSession, getPaymentStatus } from "../services/payment";
 
 function PricingSection() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [plan, setPlan] = useState("free");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const token = localStorage.getItem("userToken");
+    if (!token) return;
+
+    getPaymentStatus()
+      .then((status) => setPlan(status?.plan || "free"))
+      .catch(() => setPlan("free"));
+  }, []);
 
   const handleFreePlan = () => {
     const token = localStorage.getItem("userToken");
@@ -24,6 +34,13 @@ function PricingSection() {
     setError("");
 
     try {
+      const status = await getPaymentStatus();
+      if (status?.plan === "pro") {
+        setPlan("pro");
+        setIsLoading(false);
+        return;
+      }
+
       const checkoutUrl = await createCheckoutSession();
       window.location.href = checkoutUrl;
     } catch (err) {
@@ -33,19 +50,24 @@ function PricingSection() {
   };
 
   return (
-    <section id="pricing" className="py-24 bg-gray-950 text-white">
+    <section id="pricing" className="py-24 bg-slate-200  text-black">
       <div className="max-w-6xl mx-auto px-6 text-center">
         <h3 className="text-4xl font-bold mb-16">Simple Pricing</h3>
+        {plan === "pro" && (
+          <p className="mb-6 rounded-xl border border-green-500/40 bg-green-500/10 px-4 py-3 text-sm text-green-700">
+            You are currently on the Pro plan.
+          </p>
+        )}
         {error && (
           <p className="mb-6 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
             {error}
           </p>
         )}
-        <div className="grid md:grid-cols-2 gap-10">
-          <div className="bg-gray-900 p-10 rounded-3xl">
+        <div className="grid md:grid-cols-2 gap-10 ">
+          <div className="bg-pink-400 p-10 rounded-3xl">
             <h4 className="text-2xl font-semibold">Free</h4>
             <p className="text-4xl font-bold mt-4">$0</p>
-            <ul className="mt-6 space-y-3 text-gray-400">
+            <ul className="mt-6 space-y-3 ">
               <li>5 AI generations / month</li>
               <li>Basic Dashboard</li>
               <li>Email Support</li>
@@ -68,10 +90,10 @@ function PricingSection() {
             </ul>
             <button
               onClick={handleUpgrade}
-              disabled={isLoading}
-              className="mt-8 w-full bg-black py-3 rounded-xl font-semibold disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={isLoading || plan === "pro"}
+              className="text-white mt-8 w-full bg-black py-3 rounded-xl font-semibold disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isLoading ? "Opening Checkout..." : "Upgrade Now"}
+              {plan === "pro" ? "Current Plan" : isLoading ? "Opening Checkout..." : "Upgrade Now"}
             </button>
           </div>
         </div>

@@ -2,6 +2,8 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar.jsx';
 import Auth from './pages/Auth';
 import Landing from './pages/Landing';
+import PublicBlogs from './pages/PublicBlogs';
+import PublicBlog from './pages/PublicBlog';
 import Dashboard from './pages/Dashboard';
 import './App.css'
 
@@ -23,6 +25,8 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/blogs" element={<PublicBlogs />} />
+        <Route path="/blog/:slug" element={<PublicBlog />} />
         <Route
           path="/dashboard"
           element={

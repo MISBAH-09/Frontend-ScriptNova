@@ -185,7 +185,7 @@
 //     </div>
 //   )
 // }
-import { getUserBlogs, deleteBlog, toggleFavourite } from "../../services/blog"
+import { getUserBlogs, deleteBlog, toggleFavourite, updateBlog } from "../../services/blog"
 import { useState, useEffect } from "react"
 
 const formatDate = (d) => {
@@ -203,7 +203,7 @@ const StarIcon = ({ filled }) => (
 export default function BlogManager({ setPage, setCurrentEdit }) {
   const [blogs, setBlogs]           = useState([])
   const [loading, setLoading]       = useState(false)
-  const [filter, setFilter]         = useState("all")   // "all" | "favourite"
+  const [filter, setFilter]         = useState("all")   // "all" | "published" | "favourite"
   const [copiedSlug, setCopiedSlug] = useState(null)
 
   const openEditor = (blog) => {
@@ -252,14 +252,27 @@ export default function BlogManager({ setPage, setCurrentEdit }) {
     }
   }
 
+  const handleTogglePublished = async (blog) => {
+    const nextPublished = !blog.published
+    setBlogs(p => p.map(b => b.id === blog.id ? { ...b, published: nextPublished } : b))
+    try {
+      await updateBlog(blog.id, { published: nextPublished })
+    } catch (err) {
+      setBlogs(p => p.map(b => b.id === blog.id ? { ...b, published: blog.published } : b))
+      console.error(err)
+    }
+  }
+
   const copySlug = (slug) => {
     navigator.clipboard.writeText(`/blog/${slug}`)
     setCopiedSlug(slug)
     setTimeout(() => setCopiedSlug(null), 2000)
   }
 
-  // Filter: "favourite" means favourite === "favourite"
-  const filtered     = filter === "favourite" ? blogs.filter(b => b.favourite === "favourite") : blogs
+  const filtered =
+    filter === "favourite" ? blogs.filter(b => b.favourite === "favourite")
+    : filter === "published" ? blogs.filter(b => b.published)
+    : blogs
 
   return (
     <div>
@@ -270,7 +283,11 @@ export default function BlogManager({ setPage, setCurrentEdit }) {
             {blogs.length} blog{blogs.length !== 1 ? "s" : ""}
           </p>
           <div className="flex items-center gap-1 ml-2">
-            {[{ key: "all", label: "All" }, { key: "favourite", label: "★ Starred" }].map(({ key, label }) => (
+            {[
+              { key: "all", label: "All" },
+              { key: "published", label: "Published" },
+              { key: "favourite", label: "★ Starred" },
+            ].map(({ key, label }) => (
               <button key={key} onClick={() => setFilter(key)}
                 className={`text-xs px-3 py-1 rounded-full border font-medium transition-colors ${
                   filter === key
@@ -299,10 +316,10 @@ export default function BlogManager({ setPage, setCurrentEdit }) {
       ) : filtered.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg border-2 border-dashed border-gray-300">
           <p className="text-gray-400 text-lg mb-2">
-            {filter === "favourite" ? "⭐ No starred blogs yet" : "📭 No blogs saved yet"}
+            {filter === "favourite" ? "⭐ No starred blogs yet" : filter === "published" ? "No published blogs yet" : "📭 No blogs saved yet"}
           </p>
           <p className="text-gray-500 text-sm">
-            {filter === "favourite" ? "Star a blog to find it quickly later" : "Generate your first blog to get started"}
+            {filter === "favourite" ? "Star a blog to find it quickly later" : filter === "published" ? "Publish a draft to show it on the landing page" : "Generate your first blog to get started"}
           </p>
         </div>
       ) : (
@@ -355,6 +372,9 @@ export default function BlogManager({ setPage, setCurrentEdit }) {
                 <div className="flex justify-between items-center text-xs text-gray-400">
                   <span>{formatDate(b.created_at)}</span>
                   <div className="flex items-center gap-2">
+                    {b.published && (
+                      <span className="text-green-600 font-medium">Published</span>
+                    )}
                     {b.word_count > 0 && <span>{b.word_count} words</span>}
                     {b.is_humanized && (
                       <span className="text-purple-500 font-medium">✦ Humanized</span>
@@ -371,11 +391,19 @@ export default function BlogManager({ setPage, setCurrentEdit }) {
                     Editor
                   </button>
                   <button onClick={() => openHumanize(b)}
-                    className="flex-1 flex items-center justify-center gap-1 text-xs font-medium py-1.5 px-2 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-600 transition-colors">
+                    className="flex-1 disabled flex items-center justify-center gap-1 text-xs font-medium py-1.5 px-2 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-600 transition-colors">
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                     </svg>
                     Humanize
+                  </button>
+                  <button onClick={() => handleTogglePublished(b)}
+                    className={`flex-1 flex items-center justify-center gap-1 text-xs font-medium py-1.5 px-2 rounded-lg transition-colors ${
+                      b.published
+                        ? "bg-green-50 hover:bg-green-100 text-green-700"
+                        : "bg-gray-100 hover:bg-gray-200 text-gray-600"
+                    }`}>
+                    {b.published ? "Unpublish" : "Publish"}
                   </button>
                   <button onClick={() => handleDelete(b.id)} title="Delete"
                     className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">

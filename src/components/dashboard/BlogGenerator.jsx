@@ -81,6 +81,8 @@ export default function BlogGenerator({ generated, setGenerated, setPosts, setPa
   const [savedMsg, setSavedMsg]           = useState("")
   const [wordCount, setWordCount]         = useState(0)
   const [savedBlogId, setSavedBlogId]     = useState(null)
+  const [published, setPublished]         = useState(false)
+  const [publishLoading, setPublishLoading] = useState(false)
 
   const [editableTitle, setEditableTitle]         = useState("")
   const [regenTitleLoading, setRegenTitleLoading] = useState(false)
@@ -122,7 +124,7 @@ export default function BlogGenerator({ generated, setGenerated, setPosts, setPa
   // ── Generate Blog ──────────────────────────────────────────────────────────
   const handleGenerateBlog = async () => {
     if (!prompt.trim()) return alert("Enter a topic")
-    setLoading(true); setSavedMsg(""); setSavedBlogId(null)
+    setLoading(true); setSavedMsg(""); setSavedBlogId(null); setPublished(false)
     try {
       const res = await generateBlog({ prompt, keywords, tone, length })
       const blog = {
@@ -143,6 +145,7 @@ export default function BlogGenerator({ generated, setGenerated, setPosts, setPa
           status: "draft", word_count: calcWordCount(res.content),
         })
         setSavedBlogId(saved?.id || null)
+        setPublished(Boolean(saved?.published))
         setSavedMsg("✓ Auto-saved to your library")
         fetchRecentBlogs()
         if (setPosts) setPosts(p => [blog, ...p])
@@ -216,6 +219,25 @@ export default function BlogGenerator({ generated, setGenerated, setPosts, setPa
       setSavedMsg("✓ Title saved")
       fetchRecentBlogs()
     } catch (err) { console.error("Title patch failed:", err) }
+  }
+
+  const handlePublish = async () => {
+    if (!savedBlogId) {
+      setSavedMsg("Save needs to finish before publishing")
+      return
+    }
+    try {
+      setPublishLoading(true)
+      const updated = await updateBlog(savedBlogId, { published: true })
+      setPublished(Boolean(updated?.published ?? true))
+      setSavedMsg("Published to landing page")
+      fetchRecentBlogs()
+    } catch (err) {
+      console.error(err)
+      setSavedMsg("Could not publish")
+    } finally {
+      setPublishLoading(false)
+    }
   }
 
   const openEditor = (blogOrId) => {
@@ -337,9 +359,15 @@ export default function BlogGenerator({ generated, setGenerated, setPosts, setPa
                 {savedMsg && (
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                     savedMsg.startsWith("✓") ? "bg-green-50 text-green-600"
+                    : savedMsg.startsWith("Published") ? "bg-green-50 text-green-600"
                     : savedMsg.startsWith("✎") ? "bg-blue-50 text-blue-600"
                     : "bg-pink-50 text-pink-600"}`}>
                     {savedMsg}
+                  </span>
+                )}
+                {published && (
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-100">
+                    Live
                   </span>
                 )}
               </div>
@@ -373,6 +401,10 @@ export default function BlogGenerator({ generated, setGenerated, setPosts, setPa
               <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-gray-100">
                 <button onClick={() => openEditor(savedBlogId)}
                   className="bg-pink-500 hover:bg-pink-600 text-white px-5 py-2 rounded-md font-medium transition-colors">Edit</button>
+                <button onClick={handlePublish} disabled={publishLoading || published || !savedBlogId}
+                  className="bg-gray-900 hover:bg-black disabled:bg-gray-200 disabled:text-gray-400 text-white px-5 py-2 rounded-md font-medium transition-colors">
+                  {publishLoading ? "Publishing..." : published ? "Published" : "Publish"}
+                </button>
                 <button onClick={() => downloadFile("md", generated.content)}
                   className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-md font-medium transition-colors border">↓ Markdown</button>
                 <button onClick={() => downloadFile("txt", generated.content)}
@@ -411,6 +443,9 @@ export default function BlogGenerator({ generated, setGenerated, setPosts, setPa
                         <span className="text-xs text-gray-400">{formatDate(blog.created_at)}</span>
                         {blog.is_favourite && (
                           <span className="text-pink-400 text-xs" title="Starred">★</span>
+                        )}
+                        {blog.published && (
+                          <span className="text-green-600 text-xs font-medium">Live</span>
                         )}
                       </div>
                       {blog.word_count > 0 && (

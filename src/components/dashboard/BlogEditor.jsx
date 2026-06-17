@@ -61,6 +61,7 @@ export default function BlogEditor({ blog, setPage }) {
   const [statusMsg, setStatusMsg]   = useState("")
   const [copiedSlug, setCopiedSlug] = useState(false)
   const [favLoading, setFavLoading] = useState(false)
+  const [publishLoading, setPublishLoading] = useState(false)
   const [regenTitleLoading, setRegenTitleLoading]       = useState(false)
   const [articleAction, setArticleAction]               = useState("rephrase")
   const [articleActionLoading, setArticleActionLoading] = useState(false)
@@ -114,6 +115,22 @@ export default function BlogEditor({ blog, setPage }) {
       setCurrent(p => ({ ...p, favourite: wasStarred ? "favourite" : "normal" })) // revert
       console.error(err)
     } finally { setFavLoading(false) }
+  }
+
+  const handleTogglePublished = async () => {
+    if (!blog?.id) return
+    const nextPublished = !current.published
+    setCurrent(p => ({ ...p, published: nextPublished }))
+    try {
+      setPublishLoading(true)
+      const updated = await updateBlog(blog.id, { published: nextPublished })
+      setCurrent(p => ({ ...p, published: Boolean(updated?.published ?? nextPublished) }))
+      showMsg(nextPublished ? "Published to landing page" : "Moved back to draft")
+    } catch (err) {
+      setCurrent(p => ({ ...p, published: !nextPublished }))
+      console.error(err)
+      showMsg("Publish update failed")
+    } finally { setPublishLoading(false) }
   }
 
   // ── Regen Title ───────────────────────────────────────────────────────────
@@ -227,7 +244,7 @@ export default function BlogEditor({ blog, setPage }) {
 
           {statusMsg && (
             <span className={`text-xs font-medium px-3 py-1 rounded-full ${
-              statusMsg.startsWith("✓") || statusMsg.startsWith("★") || statusMsg.startsWith("☆")
+              statusMsg.startsWith("✓") || statusMsg.startsWith("★") || statusMsg.startsWith("☆") || statusMsg.startsWith("Published")
                 ? "bg-green-50 text-green-600"
                 : statusMsg.startsWith("✗") ? "bg-red-50 text-red-500"
                 : "bg-blue-50 text-blue-600"
@@ -236,6 +253,14 @@ export default function BlogEditor({ blog, setPage }) {
         </div>
 
         <div className="flex gap-2">
+          <button onClick={handleTogglePublished} disabled={publishLoading}
+            className={`px-4 py-2 rounded-lg border transition-colors ${
+              current.published
+                ? "bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+                : "bg-gray-900 hover:bg-black text-white border-gray-900"
+            }`}>
+            {publishLoading ? "Updating..." : current.published ? "Unpublish" : "Publish"}
+          </button>
           <button onClick={() => setPage("manage")}
             className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border transition-colors">
             ← Back

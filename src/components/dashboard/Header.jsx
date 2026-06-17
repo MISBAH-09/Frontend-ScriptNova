@@ -1,4 +1,4 @@
-a// export default function Header({page,setMobileMenu}){
+// export default function Header({page,setMobileMenu}){
 
 // const titles={
 // generate:"Generate Blog",

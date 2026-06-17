@@ -176,7 +176,7 @@ export const humanizeBlog = async ({ content, style = "natural", blog_id = null 
   try {
     const r = await api.post("/humanize/", { content, style, blog_id }, { timeout: 30000000 });
     if (!r.data || r.data.success === false) throw new Error(r.data?.message || "Humanize failed");
-    return r.data.data?.humanized_content || "";
+    return r.data.data || r.data;
   } catch (e) { handleError(e); }
 };
 

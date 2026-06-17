@@ -198,6 +198,16 @@ export const getUserBlogs = async ({ limit, favourite } = {}) => {
   } catch (e) { handleError(e); }
 };
 
+export const getPublishedBlogs = async ({ limit } = {}) => {
+  try {
+    const params = {};
+    if (limit) params.limit = limit;
+    const r = await api.get("/blogs/published/", { params });
+    const data = r.data.data || r.data;
+    return Array.isArray(data) ? data : [];
+  } catch (e) { handleError(e); }
+};
+
 export const getBlog = async (id) => {
   try {
     const r = await api.get(`/blogs/${id}/`);
@@ -235,6 +245,37 @@ export const toggleFavourite = async (id) => {
 export const getBlogStats = async () => {
   try {
     const r = await api.get("/blogs/stats/");
+    return r.data.data || r.data;
+  } catch (e) { handleError(e); }
+};
+
+export const getBlogDiscussion = async (id, reader = {}) => {
+  try {
+    const params = {};
+    if (reader.email) params.reader_email = reader.email;
+    const r = await api.get(`/blogs/${id}/discussion/`, { params });
+    return r.data.data || r.data;
+  } catch (e) { handleError(e); }
+};
+
+export const addBlogComment = async (id, body, reader = {}) => {
+  try {
+    const r = await api.post(`/blogs/${id}/comments/`, {
+      body,
+      reader_name: reader.name,
+      reader_email: reader.email,
+    });
+    return r.data.data || r.data;
+  } catch (e) { handleError(e); }
+};
+
+export const reactToBlog = async (id, reaction, reader = {}) => {
+  try {
+    const r = await api.post(`/blogs/${id}/reaction/`, {
+      reaction,
+      reader_name: reader.name,
+      reader_email: reader.email,
+    });
     return r.data.data || r.data;
   } catch (e) { handleError(e); }
 };

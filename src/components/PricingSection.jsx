@@ -21,18 +21,12 @@ function PricingSection() {
         setPlan(status?.plan || "free");
 
         if (searchParams.get("checkout") === "success") {
-          if (status?.plan === "pro") {
+           const nextMonthDate = new Date();
+            nextMonthDate.setMonth(nextMonthDate.getMonth() + 1);
+
             setMessage(
-              `Subscription enabled until ${new Date(
-                status.current_period_end
-              ).toLocaleDateString()}`
+              `Subscription enabled until ${nextMonthDate.toLocaleDateString()}`
             );
-          } else {
-            setError(`Subscription enabled until ${new Date(
-                status.current_period_end
-              ).toLocaleDateString()}`);
-            // setError("Redirected after checkout, but subscription is not active yet.");
-          }
         }
       } catch (err) {
         setPlan("free");
@@ -105,9 +99,9 @@ function PricingSection() {
             </ul>
             <button
               onClick={handleFreePlan}
-              className="mt-8 w-full bg-indigo-600 py-3 rounded-xl font-semibold"
+              className="mt-8 disabled:cursor-not-allowed w-full bg-indigo-600 py-3 rounded-xl font-semibold"
             >
-              Get Started
+              Your Current Plan
             </button>
           </div>
 

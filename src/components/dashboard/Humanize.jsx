@@ -80,6 +80,7 @@ export default function Humanize({ setPage, setCurrentEdit }) {
   const [selectedBlog, setSelectedBlog] = useState(null)
   const [loadingBlogs, setLoadingBlogs] = useState(false)
   const [selectedBlogLoading, setSelectedBlogLoading] = useState(false)
+  const [humanizeBlogId, setHumanizeBlogId] = useState(null)
 
   const [style, setStyle] = useState("natural")
   const [loading, setLoading] = useState(false)
@@ -124,12 +125,22 @@ export default function Humanize({ setPage, setCurrentEdit }) {
       if (!blog.content && blog.id) {
         const fullBlog = await getBlog(blog.id)
         setSelectedBlog(fullBlog)
+        // fill the paste area and keep blog id for saving
+        setCustomText(fullBlog.content || "")
+        setMode("custom")
+        setHumanizeBlogId(fullBlog.id)
       } else {
         setSelectedBlog(blog)
+        setCustomText(blog.content || "")
+        setMode("custom")
+        setHumanizeBlogId(blog.id)
       }
     } catch (e) {
       console.error(e)
       setSelectedBlog(blog)
+      setCustomText(blog.content || "")
+      setMode("custom")
+      setHumanizeBlogId(blog.id)
     } finally {
       setSelectedBlogLoading(false)
     }
@@ -166,7 +177,7 @@ export default function Humanize({ setPage, setCurrentEdit }) {
       const data = await humanizeBlog({
         content,
         style,
-        blog_id: mode === "blog" && selectedBlog ? selectedBlog.id : null,
+        blog_id: humanizeBlogId || (mode === "blog" && selectedBlog ? selectedBlog.id : null),
       })
 
       const resultText = typeof data === "string"

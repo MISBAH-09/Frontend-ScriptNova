@@ -14,7 +14,7 @@ export default function Sidebar({ page, setPage, navigate, mobileMenu, setMobile
     { key: "manage",    label: "My Blogs",        icon: <BookOpen size={18} /> },
     { key: "reader",    label: "Read Blogs",      icon: <Newspaper size={18} /> },
     { key: "editor",    label: "Editor",          icon: <PenSquare size={18} /> },
-    // { key: "humanize",  label: "Humanize",        icon: <Wand2 size={18} />, badge: "AI" },
+    { key: "humanize",  label: "Humanize",        icon: <Wand2 size={18} />, badge: "AI" },
     { key: "subscription", label: "Subscription", icon: <CreditCard size={18} /> },
     { key: "settings",  label: "Settings",        icon: <Settings size={18} /> },
   ];

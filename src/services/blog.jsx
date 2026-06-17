@@ -279,3 +279,11 @@ export const reactToBlog = async (id, reaction, reader = {}) => {
     return r.data.data || r.data;
   } catch (e) { handleError(e); }
 };
+
+export const detectAI = async (content) => {
+  try {
+    const r = await api.post("/detect-ai/", { content }, { timeout: 30000 });
+    if (!r.data || r.data.success === false) throw new Error(r.data?.message || "AI Detection failed");
+    return r.data.data || {};
+  } catch (e) { handleError(e); }
+};

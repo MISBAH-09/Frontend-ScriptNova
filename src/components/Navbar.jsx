@@ -33,7 +33,7 @@ function Navbar() {
         {/* Center nav links — hidden on mobile */}
         <div className="hidden md:flex gap-8 absolute left-1/2 -translate-x-1/2">
           <a href="/#features" className="hover:text-black transition-all pb-1 border-b-2 border-transparent hover:border-pink-500">Features</a>
-          <Link to="/#blogs" className="hover:text-black transition-all pb-1 border-b-2 border-transparent hover:border-pink-500">Blogs</Link>
+          <a href="/#published-blogs" className="hover:text-black transition-all pb-1 border-b-2 border-transparent hover:border-pink-500">Blogs</a>
           <a href="/#pricing"  className="hover:text-black transition-all pb-1 border-b-2 border-transparent hover:border-pink-500">Pricing</a>
           <a href="/#about"    className="hover:text-black transition-all pb-1 border-b-2 border-transparent hover:border-pink-500">About</a>
         </div>

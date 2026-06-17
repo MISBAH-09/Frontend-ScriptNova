@@ -28,7 +28,10 @@ function PricingSection() {
               ).toLocaleDateString()}`
             );
           } else {
-            setError("Redirected after checkout, but subscription is not active yet.");
+            setError(`Subscription enabled until ${new Date(
+                status.current_period_end
+              ).toLocaleDateString()}`);
+            // setError("Redirected after checkout, but subscription is not active yet.");
           }
         }
       } catch (err) {

@@ -5,6 +5,7 @@ export default function Sidebar({ page, setPage, navigate, mobileMenu, setMobile
 
   const handleNav = (target) => {
     setPage(target);
+    navigate(`/dashboard?section=${target}#${target}`);
     setMobileMenu(false);
   };
 

@@ -21,8 +21,12 @@ export const createCheckoutSession = async () => {
   return response.data.data.url;
 };
 
-export const getPaymentStatus = async () => {
-  const response = await axios.get(`${API_BASE_URL}/payments/status/`, {
+export const getPaymentStatus = async (sessionId) => {
+  const endpoint = sessionId
+    ? `${API_BASE_URL}/payments/status/?session_id=${encodeURIComponent(sessionId)}`
+    : `${API_BASE_URL}/payments/status/`;
+
+  const response = await axios.get(endpoint, {
     headers: getAuthHeaders(),
   });
 

@@ -17,7 +17,7 @@ function PricingSection() {
 
     const refreshStatus = async () => {
       try {
-        const status = await getPaymentStatus();
+        const status = await getPaymentStatus(searchParams.get("session_id"));
         setPlan(status?.plan || "free");
 
         if (searchParams.get("checkout") === "success") {
@@ -31,8 +31,9 @@ function PricingSection() {
             setError("Redirected after checkout, but subscription is not active yet.");
           }
         }
-      } catch {
+      } catch (err) {
         setPlan("free");
+        setError(err.message || "Unable to refresh payment status.");
       }
     };
 

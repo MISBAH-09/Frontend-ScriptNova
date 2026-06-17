@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom"
 
 // import Sidebar from "../components/dashboard/Sidebar"
 import Sidebar from "../components/dashboard/Sidebar"
@@ -15,9 +15,12 @@ import ReaderBlogs from "../components/dashboard/ReaderBlogs"
 
 export default function Dashboard() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const sectionParam = searchParams.get("section") || location.hash.replace("#", "")
 
   const [posts, setPosts]           = useState([])
-  const [page, setPage]             = useState("generate")
+  const [page, setPage]             = useState(sectionParam || "generate")
   const [generated, setGenerated]   = useState(null)
   const [currentEdit, setCurrentEdit] = useState(null)
   const [mobileMenu, setMobileMenu] = useState(false)
@@ -30,6 +33,24 @@ export default function Dashboard() {
   useEffect(() => {
     localStorage.setItem("sn_posts", JSON.stringify(posts))
   }, [posts])
+
+  useEffect(() => {
+    if (sectionParam && sectionParam !== page) {
+      setPage(sectionParam)
+    }
+  }, [sectionParam])
+
+  useEffect(() => {
+    const currentSection = searchParams.get("section")
+    const currentHash = location.hash.replace("#", "")
+
+    if (page !== currentSection || page !== currentHash) {
+      const params = new URLSearchParams(searchParams)
+      params.set("section", page)
+      setSearchParams(params, { replace: true })
+      window.history.replaceState(null, "", `/dashboard?${params.toString()}#${page}`)
+    }
+  }, [page, location.hash])
 
   const renderPage = () => {
     switch (page) {

@@ -2,6 +2,9 @@
 
 React + Vite frontend for the ScriptNova AI blog generation platform. Users can generate, edit, star, and manage AI-written blogs with a clean dashboard UI.
 
+Live frontend: https://www.scriptnova.me/
+Backend API: https://scriptnova-backend.onrender.com
+
 ---
 
 ## Tech Stack

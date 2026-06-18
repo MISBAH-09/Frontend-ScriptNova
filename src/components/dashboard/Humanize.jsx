@@ -363,6 +363,9 @@ export default function Humanize({ setPage, setCurrentEdit }) {
               : <><Wand2 className="w-4 h-4" />Humanize Content</>
             }
           </button>
+          <p className="text-xs text-gray-500 italic mt-2">
+            Humanizer function accuracy is yet needed to be improved.
+          </p>
         </div>
 
         {/* ── RIGHT: Output ── */}

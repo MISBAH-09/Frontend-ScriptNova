@@ -354,7 +354,14 @@ export default function BlogManager({ setPage, setCurrentEdit }) {
 
               {/* Slug — click to copy */}
               {b.slug && (
-                <button onClick={() => copySlug(b.slug)} title="Click to copy slug URL"
+                <button onClick={() => 
+                  {blog.slug && (
+                      <Link to={`/blog/${blog.slug}`} className="font-semibold text-pink-600 hover:text-pink-700">
+                        Read article
+                      </Link>
+                    )}
+                  // copySlug(b.slug)
+                } title="Click to copy slug URL"
                   className="flex items-center gap-1 text-xs text-gray-300 hover:text-pink-400 font-mono mb-2 truncate text-left transition-colors group">
                   <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round"

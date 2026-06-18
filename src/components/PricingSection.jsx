@@ -72,6 +72,9 @@ function PricingSection() {
   return (
     <section id="pricing" className="py-24 bg-slate-200  text-black">
       <div className="max-w-6xl mx-auto px-6 text-center">
+        <div className="mb-6 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-700">
+          NO PAYMENT YET - THIS IS JUST FOR TESTING AND INTEGRATION. WEBSITE IS FREE RIGHT NOW
+        </div>
         <h3 className="text-4xl font-bold mb-16">Simple Pricing</h3>
         {plan === "pro" && (
           <p className="mb-6 rounded-xl border border-green-500/40 bg-green-500/10 px-4 py-3 text-sm text-green-700">

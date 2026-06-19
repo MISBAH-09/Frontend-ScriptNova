@@ -69,19 +69,33 @@ export default function BlogEditor({ blog, setPage }) {
   // useEffect(() => {
    useEffect(() => {
   if (!blog?.id) {
-    setLoading(false); // 🔥 important fix
+    // If content is passed from Humanize but no ID, just initialize with that
+    if (blog?.content && blog?.title) {
+      setCurrent(p => ({
+        ...p, 
+        title: blog.title, 
+        content: blog.content,
+        slug: blog.slug || ""
+      }))
+      setWordCount(calcWordCount(blog.content))
+    }
+    setLoading(false);
     return;
   }
     ;(async () => {
       try {
         setLoading(true)
         const data = await getBlogById(blog.id)
-        setCurrent(data)
-        setWordCount(calcWordCount(data.content))
+        // If humanized content was passed, use it as the content
+        const finalData = blog.content 
+          ? { ...data, content: blog.content }
+          : data
+        setCurrent(finalData)
+        setWordCount(calcWordCount(finalData.content))
       } catch (err) { console.error(err) }
       finally { setLoading(false) }
     })()
-  }, [blog?.id])
+  }, [blog?.id, blog?.content])
 
   const showMsg = (msg) => { setStatusMsg(msg); setTimeout(() => setStatusMsg(""), 4000) }
 

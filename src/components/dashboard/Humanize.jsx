@@ -73,7 +73,7 @@ const renderMarkdown = (md) => {
   return html
 }
 
-export default function Humanize({ setPage, setCurrentEdit }) {
+export default function Humanize({ setPage, setCurrentEdit, currentEdit }) {
   const [mode, setMode] = useState("custom")
   const [customText, setCustomText] = useState("")
   const [blogs, setBlogs] = useState([])
@@ -96,6 +96,14 @@ export default function Humanize({ setPage, setCurrentEdit }) {
   const [detecting, setDetecting] = useState(false)
 
   useEffect(() => { if (mode === "blog") fetchBlogs() }, [mode])
+
+  // Auto-load blog if passed from BlogManager
+  useEffect(() => {
+    if (currentEdit?.id && blogs.length > 0) {
+      const blog = blogs.find(b => b.id === currentEdit.id)
+      if (blog) loadSelectedBlog(blog)
+    }
+  }, [currentEdit?.id, blogs])
 
   // Auto-detect score when input changes (from file 1)
   useEffect(() => {
@@ -211,7 +219,12 @@ export default function Humanize({ setPage, setCurrentEdit }) {
   // openEditor uses setCurrentEdit with content (from file 1)
   const openEditor = () => {
     if (!result) return
-    setCurrentEdit({ content: result, title: selectedBlog?.title || "Humanized content" })
+    setCurrentEdit({ 
+      id: selectedBlog?.id,
+      slug: selectedBlog?.slug,
+      content: result, 
+      title: selectedBlog?.title || "Humanized content" 
+    })
     setPage("editor")
   }
 
@@ -363,9 +376,6 @@ export default function Humanize({ setPage, setCurrentEdit }) {
               : <><Wand2 className="w-4 h-4" />Humanize Content</>
             }
           </button>
-          <p className="text-xs text-gray-500 italic mt-2">
-            Humanizer function accuracy is yet needed to be improved.
-          </p>
         </div>
 
         {/* ── RIGHT: Output ── */}
@@ -438,6 +448,10 @@ export default function Humanize({ setPage, setCurrentEdit }) {
             </div>
           )}
         </div>
+
+          <p className="text-xs  italic mt-2 ">
+           NOTE : Humanizer function accuracy is yet needed to be improved.
+          </p>
       </div>
     </div>
   )
